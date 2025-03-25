@@ -124,6 +124,16 @@ const MeetingRoom = () => {
     }
   };
 
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.altKey && e.key === "a") {
+        handleScreenshot();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [handleScreenshot]);
   const CallLayout = () => {
     switch (layout) {
       case "grid":
@@ -162,11 +172,11 @@ const MeetingRoom = () => {
         <CallStatsButton />
 
         {/* Screenshot Button */}
-        <button onClick={handleScreenshot}>
+        {/* <button onClick={handleScreenshot}>
           <div className="cursor-pointer rounded-2xl bg-[#19232d] px-4 py-2 hover:bg-[#4c535b]">
             <FaCamera size={20} className="text-white" />
           </div>
-        </button>
+        </button> */}
 
         <button onClick={() => setShowParticipants((prev) => !prev)}>
           <div className="cursor-pointer rounded-2xl bg-[#19232d] px-4 py-2 hover:bg-[#4c535b]">
