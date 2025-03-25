@@ -106,13 +106,13 @@ const MeetingRoom = () => {
           toast({
             title: "Garbage Detected",
             description:
-              "The content contains vulgar or inappropriate material.",
+              "The garbage is detected in the screenshot. Sending repsonse to NGOs",
             variant: "destructive", // Optional styling for a warning
           });
         } else {
           toast({
             title: "NO garbage detected",
-            description: "No vulgar or NSFW content detected.",
+            description: "No garbage detected in the screenshot. All good!",
           });
         }
       } else {
