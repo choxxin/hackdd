@@ -60,7 +60,7 @@ const MeetingRoom = () => {
     }
   };
   const checkNSFWWithGemini = async (text: string) => {
-    const prompt = `Determine if the following text contains  Any kind of material or garbage like bottle tell it is garbage or not  "${text}"`;
+    const prompt = `Determine if the following text contains  Any kind of material or garbage like bottle tell it is garbage. Yes or not "${text}"`;
     const result = await model.generateContent(prompt);
     return result.response.text().trim(); // Expected to return "Yes" or "No"
   };
@@ -96,7 +96,7 @@ const MeetingRoom = () => {
         await new Promise((resolve) => setTimeout(resolve, 5000)); // Introduce a 5-second delay
 
         // Step 4: Now, show the Gemini API toast
-        toast({ title: "Sending text to Gemini API for NSFW check..." });
+        toast({ title: "Sending text to Gemini API ..." });
 
         // Step 5: Check NSFW content with Gemini API
         const nsfwCheck = await checkNSFWWithGemini(generatedText);
@@ -104,14 +104,14 @@ const MeetingRoom = () => {
         // Step 6: Handle the NSFW check result
         if (nsfwCheck.toLowerCase() === "yes") {
           toast({
-            title: "NSFW Content Detected",
+            title: "Garbage Detected",
             description:
               "The content contains vulgar or inappropriate material.",
             variant: "destructive", // Optional styling for a warning
           });
         } else {
           toast({
-            title: "Content Safe",
+            title: "NO garbage detected",
             description: "No vulgar or NSFW content detected.",
           });
         }
