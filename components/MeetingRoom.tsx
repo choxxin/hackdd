@@ -34,7 +34,7 @@ const MeetingRoom = () => {
     setCurrentUrl(window.location.href);
   }, []);
   const geminiApiKey =
-    process.env.GEMINI_API_KEY || "AIzaSyDi4MQ5UAxYq57fqemS0C1dqiUFDOMGZRE"; // Default to an empty string if undefined
+    process.env.GEMINI_API_KEY || "AIzaSyBl5lM6Md8_YbDt7o-rmB2SiIyppPT32dU"; // Default to an empty string if undefined
   const genAI = new GoogleGenerativeAI(geminiApiKey);
 
   // const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY); // Replace with your actual Gemini API key
@@ -60,7 +60,7 @@ const MeetingRoom = () => {
     }
   };
   const checkNSFWWithGemini = async (text: string) => {
-    const prompt = `Determine if the following text contains vulgar or NSFW content. Respond with "Yes" or "No". Text: "${text}"`;
+    const prompt = `Determine if the following text contains  Any kind of material or garbage like bottle tell it is garbage or not  "${text}"`;
     const result = await model.generateContent(prompt);
     return result.response.text().trim(); // Expected to return "Yes" or "No"
   };
