@@ -16,6 +16,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import React, { useEffect, useState } from "react";
 import { LayoutList, Loader, Users } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { Description } from "@radix-ui/react-toast";
 
 type callLayoutType = "grid" | "speaker-left" | "speaker-right";
 
@@ -59,64 +60,163 @@ const MeetingRoom = () => {
       return null;
     }
   };
+  const checkReforestationPossibility = async (text: string) => {
+    const prompt = `Determine if the following text indicates a need for reforestation. 
+    If the text mentions deforestation, barren land, or lack of greenery "${text}"`;
+
+    const result = await model.generateContent(prompt);
+    return result.response.text().trim(); // Expected to return "Yes" or "No"
+  };
+
   const checkNSFWWithGemini = async (text: string) => {
     const prompt = `Determine if the following text contains  Any kind of material or garbage like bottle tell it is garbage. Yes or not "${text}"`;
     const result = await model.generateContent(prompt);
     return result.response.text().trim(); // Expected to return "Yes" or "No"
   };
-
+  //temp to store
+  let tempText = "";
   // Function to capture screenshot and process it
   const handleScreenshot = async () => {
     try {
-      const element = document.body; // Capture the entire body (or a specific element)
-      const canvas = await html2canvas(element); // Capture screenshot
+      const element = document.body;
+      const canvas = await html2canvas(element);
       const blob = await new Promise<Blob | null>((resolve) => {
         canvas.toBlob((blob) => resolve(blob), "image/png");
       });
 
-      if (blob) {
-        toast({ title: "Processing screenshot with Hugging Face API..." });
+      if (!blob) {
+        toast({ title: "Failed to capture screenshot." });
+        return;
+      }
 
-        // Step 1: Get text from the screenshot using Hugging Face API
-        const huggingFaceResponse = await queryHuggingFace(blob);
-        const generatedText = huggingFaceResponse[0]?.generated_text;
+      toast({ title: "Processing screenshot with Hugging Face API..." });
 
-        if (!generatedText) {
-          toast({ title: "someone looking at screen" });
-          return;
-        }
+      // Step 1: Get text from the screenshot using Hugging Face API
+      const huggingFaceResponse = await queryHuggingFace(blob);
+      const tempText = huggingFaceResponse?.[0]?.generated_text;
 
-        // Step 2: Show Hugging Face response toast
+      if (!tempText) {
+        toast({ title: "Someone is looking at the screen" });
+        return;
+      }
+
+      // Wait for Hugging Face response before showing toast
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // Add small delay
+      toast({
+        title: `Hugging Face Response: ${tempText}`,
+        duration: 5000,
+      });
+
+      // Step 2: Wait for 5 seconds before sending text to Gemini API
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      toast({ title: "Sending text to Gemini API ..." });
+
+      // Step 3: Check NSFW content with Gemini API
+      const nsfwCheck = await checkNSFWWithGemini(tempText);
+
+      if (nsfwCheck.toLowerCase() === "yes") {
         toast({
-          title: `Hugging Face Response: ${generatedText}`,
-          duration: 5000, // This keeps the toast visible for 5 seconds
+          title: "Garbage Detected",
+          description:
+            "Garbage detected in the screenshot. Sending response to NGOs...",
+          variant: "destructive",
         });
 
-        // Step 3: Wait for 5 seconds before sending text to Gemini API
-        await new Promise((resolve) => setTimeout(resolve, 5000)); // Introduce a 5-second delay
+        const garbageData = {
+          location: "Phagwara",
+          type: "Plastic",
+          description: tempText,
+        };
 
-        // Step 4: Now, show the Gemini API toast
-        toast({ title: "Sending text to Gemini API ..." });
+        try {
+          const response = await fetch(
+            "http://localhost:3000/api/savegarbage",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(garbageData),
+            }
+          );
 
-        // Step 5: Check NSFW content with Gemini API
-        const nsfwCheck = await checkNSFWWithGemini(generatedText);
-
-        // Step 6: Handle the NSFW check result
-        if (nsfwCheck.toLowerCase() === "yes") {
+          const result = await response.json();
+          if (response.ok) {
+            toast({
+              title: "Saved Successfully",
+              description: "Garbage details saved!",
+            });
+          } else {
+            toast({
+              title: "Failed to Save",
+              description: result.error || "An error occurred.",
+            });
+          }
+        } catch (error) {
+          console.error("Error saving garbage:", error);
           toast({
-            title: "Garbage Detected",
-            description:
-              "The garbage is detected in the screenshot. Sending repsonse to NGOs",
-            variant: "destructive", // Optional styling for a warning
-          });
-        } else {
-          toast({
-            title: "NO garbage detected",
-            description: "No garbage detected in the screenshot. All good!",
+            title: "Error",
+            description: "Failed to connect to the database.",
           });
         }
       } else {
-        toast({ title: "Failed to capture screenshot." });
+        await new Promise((resolve) => setTimeout(resolve, 2000)); // Delay before next toast
+        toast({
+          title: "No garbage detected",
+          description: "Everything looks clean!",
+        });
+      }
+
+      // Step 4: Wait for 10 seconds before analyzing reforestation
+      await new Promise((resolve) => setTimeout(resolve, 15000));
+      toast({ title: "Analyzing environmental condition..." });
+
+      const reforestationAnalysis = await checkReforestationPossibility(
+        tempText
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // Small delay before next toast
+      toast({
+        title: "Reforestation Analysis",
+        description: reforestationAnalysis,
+        duration: 7000,
+      });
+
+      // Save reforestation data to MongoDB
+      const reforestationData = {
+        location: "Phagwara, Punjab",
+        reforestation: reforestationAnalysis,
+        garbage_collection: tempText,
+      };
+
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      try {
+        const response = await fetch(
+          "http://localhost:3000/api/create_eco_info",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(reforestationData),
+          }
+        );
+
+        const result = await response.json();
+        if (response.ok) {
+          toast({
+            title: "Saved Successfully",
+            description: "Reforestation details saved!",
+          });
+        } else {
+          toast({
+            title: "Failed to Save",
+            description: result.error || "An error occurred.",
+          });
+        }
+      } catch (error) {
+        console.error("Error saving reforestation:", error);
+        toast({
+          title: "Error",
+          description: "Failed to connect to the database.",
+        });
       }
     } catch (error) {
       console.error("Error capturing screenshot:", error);
