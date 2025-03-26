@@ -47,7 +47,7 @@ const MeetingRoom = () => {
         "https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-large",
         {
           headers: {
-            Authorization: "Bearer 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", // Replace with your Hugging Face token
+            Authorization: "Bearer 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", // Replace with your Hugging Face token
           },
           method: "POST",
           body: data,
@@ -74,7 +74,7 @@ const MeetingRoom = () => {
     return result.response.text().trim(); // Expected to return "Yes" or "No"
   };
   //temp to store
-  let tempText = "";
+
   // Function to capture screenshot and process it
   const handleScreenshot = async () => {
     try {
@@ -100,8 +100,7 @@ const MeetingRoom = () => {
         return;
       }
 
-      // Wait for Hugging Face response before showing toast
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Add small delay
+      await new Promise((resolve) => setTimeout(resolve, 3000)); // Small delay before toast
       toast({
         title: `Hugging Face Response: ${tempText}`,
         duration: 5000,
@@ -140,6 +139,7 @@ const MeetingRoom = () => {
 
           const result = await response.json();
           if (response.ok) {
+            await new Promise((resolve) => setTimeout(resolve, 3000)); // Delay before showing success message
             toast({
               title: "Saved Successfully",
               description: "Garbage details saved!",
@@ -158,22 +158,22 @@ const MeetingRoom = () => {
           });
         }
       } else {
-        await new Promise((resolve) => setTimeout(resolve, 2000)); // Delay before next toast
+        await new Promise((resolve) => setTimeout(resolve, 3000)); // Delay before next toast
         toast({
           title: "No garbage detected",
           description: "Everything looks clean!",
         });
       }
 
-      // Step 4: Wait for 10 seconds before analyzing reforestation
-      await new Promise((resolve) => setTimeout(resolve, 15000));
+      // Step 4: Wait for 12 seconds before analyzing reforestation
+      await new Promise((resolve) => setTimeout(resolve, 10000));
       toast({ title: "Analyzing environmental condition..." });
 
       const reforestationAnalysis = await checkReforestationPossibility(
         tempText
       );
 
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Small delay before next toast
+      await new Promise((resolve) => setTimeout(resolve, 3000)); // Small delay before next toast
       toast({
         title: "Reforestation Analysis",
         description: reforestationAnalysis,
@@ -187,7 +187,7 @@ const MeetingRoom = () => {
         garbage_collection: tempText,
       };
 
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 3000)); // Delay before saving data
 
       try {
         const response = await fetch(
@@ -201,6 +201,7 @@ const MeetingRoom = () => {
 
         const result = await response.json();
         if (response.ok) {
+          await new Promise((resolve) => setTimeout(resolve, 4000)); // Delay before showing success message
           toast({
             title: "Saved Successfully",
             description: "Reforestation details saved!",
