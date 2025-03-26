@@ -128,14 +128,11 @@ const MeetingRoom = () => {
         };
 
         try {
-          const response = await fetch(
-            "http://localhost:3000/api/savegarbage",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(garbageData),
-            }
-          );
+          const response = await fetch("/api/savegarbage", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(garbageData),
+          });
 
           const result = await response.json();
           if (response.ok) {
@@ -190,14 +187,11 @@ const MeetingRoom = () => {
       await new Promise((resolve) => setTimeout(resolve, 3000)); // Delay before saving data
 
       try {
-        const response = await fetch(
-          "http://localhost:3000/api/create_eco_info",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(reforestationData),
-          }
-        );
+        const response = await fetch("/api/create_eco_info", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(reforestationData),
+        });
 
         const result = await response.json();
         if (response.ok) {
